@@ -1,6 +1,7 @@
 function O = outlying_function(z, Sn, M, maxit)
 % Sn: the cell of tensor samples
-% 
+% M: Number of vectors generated
+% z: Point of evaluation
 n = length(Sn); r_0 = 1;
 sz = size(z);
 N = length(sz);

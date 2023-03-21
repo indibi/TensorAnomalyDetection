@@ -1,4 +1,4 @@
-function [L, S, Nt, times] = loss(Y, param)
+function [L, S, Nt, timeS] = loss(Y, param)
 % [S] = low_temp_sp_dec(Y, param)
 % Low rank+Temporally Smooth Sparse Decomposition
 
