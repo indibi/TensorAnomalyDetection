@@ -35,7 +35,7 @@ if length(varargin) == 4
 else
     rng(11);
 end
-if isempty(varargin{1})
+if length(varargin)==0
     var=0.1;
     t=(1:dims(1))/dims(1);
     Y = zeros(dims);

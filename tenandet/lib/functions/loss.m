@@ -53,6 +53,7 @@ while true
     tstart = tic;
     temp1 = zeros(sz);
     for i=1:N
+    %parfor i=1:N
         temp1 = temp1+beta_1*(Y-L{i}-Nt+Lam1{i});
     end
     temp1(~mask_Y) = 0;
@@ -64,6 +65,7 @@ while true
     tstart = tic;
     Nt = zeros(size(Y));
     for i=1:N
+    %parfor i=1:N
         Nt = (beta_1/(N*beta_1+alpha)).*(Y+Lam1{i}-L{i}-S);
     end
     timeN(end+1)=toc(tstart);
@@ -84,6 +86,7 @@ while true
     tstart = tic;
     temp = 0;
     for i=1:N
+    %parfor i=1:N
         Lam1_up = Y-L{i}-S-Nt;
         temp = temp + norm(Lam1_up(mask_Y))^2;
         Lam1{i}(mask_Y) = Lam1{i}(mask_Y)+Lam1_up(mask_Y);

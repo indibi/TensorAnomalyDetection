@@ -23,7 +23,7 @@ def __roll_2_dim(X, m):
     n = X.shape; N = len(n)
     dest = np.arange(N)
     src = (np.arange(N) + (m-1))%N
-    return np.moveaxis(X, src, dest) 
+    return np.moveaxis(X, src, dest)
 
 def convert_index(n,i,k):
     """Convert the index of an element of a tensor into it's k'th mode unfolding index

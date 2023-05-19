@@ -1,0 +1,50 @@
+function [X_an,anomaly_mask] = add_persistent_anomaly(X,anomaly_len,num_anomaly,anomaly_amp, varargin)
+%add_persistent_anomaly Generate synthetic anomalies for tensor X that is
+% persistent for a period of length anomaly_len 
+%
+% [X_an,anomaly_ind] = add_persistent_anomaly(X,anomaly_len,...
+%                                              ,num_anomaly,anomaly_amp)
+% Inputs:
+% anomaly_len: length of each anomalies
+% num_anomaly: Number of synthetic anomalies
+% anomaly_amp: Amplitude of each anomalies
+% mode: The mode in which the anomalies are persistent. Defaults to 1
+%
+% Outputs:
+% X_an: Tensor X with anomaly superposed
+% anomaly_mask: Labels of anomalies. 1 for anomalous, 0 otw.
+if length(varargin)==0
+    mode = 1;
+else
+    mode = varargin{1};
+end
+
+sz = size(X);
+x = t2m(X,mode);
+sz_m = size(x);
+
+assert(length(sz)>=2,'add_persistent_anomaly:inputTensorError',...
+    'Tensor has only one mode')
+assert(length(sz)>=mode,'add_persistent_anomaly:inputTensorError',...
+    'Tensor mode that has the anomaly persistency does not exist')
+assert(sz(1)>=anomaly_len,'add_persistent_anomaly:anomaly_lenError',...
+    'Anomaly length is longer than the first mode')
+assert(sz_m(2)>=num_anomaly,'add_persistent_anomaly:num_anomalyError',...
+    'Number of anomalies cannot be larger than the unique samples')
+
+
+anomaly = zeros(size(x));
+anomaly_indicator = zeros(size(x));
+anomalous_sample_idxes = randperm(sz_m(2),num_anomaly);
+
+for i = 1:num_anomaly
+    an_start = randi(sz(mode)-anomaly_len);
+    an_end = an_start + anomaly_len;
+    add_sub = sign(randn);
+    anomaly(an_start:an_end, anomalous_sample_idxes(i)) = add_sub*anomaly_amp*log(abs(mean(x(:,anomalous_sample_idxes(i)))))^2;
+    anomaly_indicator(an_start:an_end, anomalous_sample_idxes(i)) = 1;
+end
+
+anomaly_mask = m2t(anomaly_indicator,sz,mode);
+X_an = m2t(anomaly,sz,mode);
+end
