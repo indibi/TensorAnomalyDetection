@@ -5,7 +5,7 @@ from numpy.linalg import norm
 from src.util.t2m import t2m
 from src.util.m2t import m2t
 
-def tensor_outlying_function(X, Sn, maxit=100, err_tol=1e-4, v=2, seed=10, return_Us=False):
+def tensor_outlying_function(X, Sn, maxit=100, err_tol=1e-4, v=2, seed=10, return_Us=False, pre_tensor_pca=True, **kwargs):
     """Returns a samples Rayleigh projection depth for tensors.
 
     Args:
@@ -15,15 +15,22 @@ def tensor_outlying_function(X, Sn, maxit=100, err_tol=1e-4, v=2, seed=10, retur
         maxit (int): iteration limit for the algorithm
         err_tol (float): convergence criteria
         v (int): verbosity flag. 
+        threshold (float, optional): Explainability threshold. Eigenvalues that have lower explainability
+        than the threshold are discarded. Defaults to 0.01.
     """
+
+    # if pre_tensor_pca:
+    #     threshold = kwargs.get('threshold')
+    #     Sn, X = pre_tensor_pca(Sn, X)
+
     # Initialization
-    rng = np.random.default_rng(seed)
+    # rng = np.random.default_rng(seed)
     M = len(Sn)
     dim = X.shape
     N = len(dim)
     # As = [np.zeros((n,n)) for n in dim] # A = (x-E[X])(x-E[X])^T
     # Bs = [np.zeros((n,n)) for n in dim] # B = E[(X-E[X])(X-E[X])^T]
-    Us = [rng.normal(0,1,(n,1)) for n in dim]
+    Us = [np.ones((n,1)) for n in dim]#/rng.normal(0,1,(n,1)) for n in dim]
     Us = [u/norm(u) for u in Us]
     
     it=0
@@ -72,7 +79,35 @@ def tensor_outlying_function(X, Sn, maxit=100, err_tol=1e-4, v=2, seed=10, retur
         return O_r_pass[-1],np.array(O_r_pass)
 
 
-                
+def pre_tensor_pca(Sn, X, threshold=0.01, rank=None):
+    """Apply dimensionality reduction PCA to the samples of Sn and X
+
+    Args:
+        Sn (list): List of samples (tensors)
+        X (np.ndarray): Point of evaluation
+        threshold (float, optional): Explainability threshold. Eigenvalues that have lower explainability
+        than the threshold are discarded. Defaults to 0.01.
+        rank (tuple, optional): If the rank is provided, instead of using a threshold the dimensionality
+        reduction is done via the rank. In other words, the samples in Sn and X are projected to
+        a subspace of R^{rank1 x rank2 x ... }. Defaults to None.
+    Returns:
+        Sn_projected
+        X_projected
+    """
+
+    sz = X.shape
+    Snc = [s.copy() for s in Sn] 
+    kept_ranks = []
+    for i in range(len(sz)):
+        Sn_i = [t2m(s,i+1) for s in Sn] # 
+        M = sum(Sn_i)/len(Sn_i)         # Find the mean
+        C = sum([(s-M)@(s-M).T for s in Sn_i])/len(Sn)
+        lda, u = eigh(C)
+        threshold*np.abs(lda)>sum(np.abs(lda))
+
+        
+
+
 
 
 
@@ -118,7 +153,7 @@ def mode_product(X, A, n):
     X_n = t2m(X,n)
     return m2t(A@X_n,newdims,n)
 
-def vector_outlying_score(x, Sn, return_v=False):
+def vector_outlying_score(x, Sn, return_v=False, verbose=0):
     """Rayleigh outlying score
 
     Args:
@@ -134,13 +169,28 @@ def vector_outlying_score(x, Sn, return_v=False):
     try:
         lda, u = eigh(A,B,subset_by_index=[len(x)-1,len(x)-1])
     except:# LinAlgError:
-        print(eigh(B))
+        ldas, us = eigh(B)
+        ldas[np.isclose(ldas,np.zeros(ldas.shape))] = 0
+        nonzeros = ldas>0
+        #B =  us[:,nonzeros]@np.diag(ldas[nonzeros])@us[:,nonzeros].T
+        sn_new = us[:,nonzeros]@us[:,nonzeros].T@Sn # Project to nonzero with PCA
+        B = np.cov(sn_new)
+        mu = np.mean(Sn,1).reshape((len(x),1))
+        x = x.reshape((len(x),1))
+        x = us[:,nonzeros]@us[:,nonzeros].T@x
+        A = (x-mu)@(x-mu).T
         try:
-            B = B + np.eye(B.shape[0])*1e-3
+            #B = B + np.eye(B.shape[0])*1e-1
             lda, u = eigh(A,B,subset_by_index=[len(x)-1,len(x)-1])
         except:
-            print(eig(B))
-            raise RuntimeError("weird error")    
+            if verbose:
+                print(eigh(B))
+            try:
+                B = B + np.eye(B.shape[0])*1e-3
+                lda, u = eigh(A,B,subset_by_index=[len(x)-1,len(x)-1])
+            except:
+                print(eigh(B))
+                raise RuntimeError("weird error")
     if return_v:
         return np.sqrt(lda),u
     else:

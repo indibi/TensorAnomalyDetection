@@ -34,10 +34,10 @@ NoA = 100*NoAD;     % Total number of anomalies
 NoT = 1;            % Number of trials
 LoA = 8;            % Length of anomalies
 % Independent variables -------
-cs = [2,3,4,5,10];  % Range of anomaly amplitudes
+cs = [2,3,4,5,6];  % Range of anomaly amplitudes
 % Dependent variable    -------
 os = zeros(81,length(cs),NoT);% Outlying scores
-
+auc = zeros(length(cs),NoT);
 %% 
 % 
 select_locs = cell(length(cs),1);
@@ -53,6 +53,7 @@ tocs = zeros(length(cs),1);
 Sns = cell(81,length(cs));
 zs = cell(length(cs),1);
 
+tstart = tic
 parfor i=1:length(cs)
     for t=1:NoT
     % Create anomalies ------------
@@ -69,7 +70,7 @@ parfor i=1:length(cs)
     params{i}.lambda=5e-2;
     params{i}.gamma=5e-2;
     params{i}.err_tol=1e-4;
-    params{i}.max_iter=400;
+    params{i}.max_iter=200;
     tics(i)= tic;
     [Ls{i},Ss{i},~,~]= loss(Yns{i}, params{i});
     tocs(i) = toc;
@@ -81,10 +82,31 @@ parfor i=1:length(cs)
     end
     for n=1:81
         z = Sn{n}; 
-        [os(n,i,t), ~]= outlying_function2(z,Sn,100,1e-3,0);
+        [os(n,i,t), ~]= outlying_function2(z,Sn,80,1e-3,0);
     end
+    
+    labels= {'Normal'};
+    labels =repmat(labels,81,1);
+    for k=select_locs{i}
+        labels{k} = 'Anomaly'; 
+    end
+    classNames = cell(2,1);
+    classNames{1}='Normal';
+    classNames{2}='Anomaly';
+    score = [-outlying_score(:,i,t),outlying_score(:,i,t)];
+    rocObj = rocmetrics(labels,score,classNames);
+    auc(i,t) = rocObj.AUC(1);
+
     end
 end
-
+tEnd = toc(tstart)
+results.auc = auc;
+results.cs = cs;
+results.NoAD = NoAD;
+results.NoA = NoA;
+results.LoA = LoA;
+results.NoT = NoT;
+results.time_spent = tEnd;
+save('exp1_amplitude_vs_auc.mat','results');
 
 

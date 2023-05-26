@@ -762,9 +762,9 @@ class GraphProcess(object):
             lda = self.Graph.PG.lda
             V = self.Graph.PG.V
         cov = LA.pinv(np.diag(lda),hermitian=True)
-
-        X0 = rng.multivariate_normal(np.zeros(np.prod(n)), cov, NoS).T
         n = self.Graph.n
+        X0 = rng.multivariate_normal(np.zeros(np.prod(n)), cov, NoS).T
+        
         n_new = [ni for ni in n]+[NoS]
         X = m2t( (V@X0).T ,n_new,len(n_new))
         return X
