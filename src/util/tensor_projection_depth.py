@@ -186,7 +186,7 @@ def vector_outlying_score(x, Sn, return_v=False, verbose=0):
             if verbose:
                 print(eigh(B))
             try:
-                B = B + np.eye(B.shape[0])*1e-3
+                B = B + np.eye(B.shape[0])*1e-6
                 lda, u = eigh(A,B,subset_by_index=[len(x)-1,len(x)-1])
             except:
                 print(eigh(B))

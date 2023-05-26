@@ -54,7 +54,7 @@ while it<maxit
         B{mode}= cov([sn{:};].');
         A{mode}= (z{mode}-mu{mode})*(z{mode}-mu{mode}).';
         
-        [V,D,W] = eig(A{mode},B{mode});
+        [V,D,W] = eig(A{mode},B{mode},'qz');
         [lda,idx] = max(diag(D));
         u{mode}=V(:,idx)/norm(V(:,idx),2);
         O_R(it*N+mode)= sqrt(lda);
