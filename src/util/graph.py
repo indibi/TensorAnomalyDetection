@@ -62,7 +62,7 @@ class Graph(object):
             n = P['dim']
             self.graph_type=P['type']
             self.graph_params=P['g_params']
-            seed = int(rng.uniform(0,9999))
+            seed = P.get('seed',int(rng.uniform(0,9999)))
             iter=0
             if P['type']=='er':
                 msg = "Cannot create a connected graph. Please increase edge probability."
@@ -85,15 +85,15 @@ class Graph(object):
                         A[A<threshold] = 0
                         A[np.diag_indices_from(A)] = 0
                         G = nx.from_numpy_array(A)
-                if nx.is_connected(G): # break if the graph is not required to be connected
-                    self.G=G
-                    break
-                elif iter==max_iter:
-                    raise ValueError(msg)
-                iter +=1
-            self.G = G
-            self.A = nx.to_numpy_array(self.G)
-            self.L = self.A_to_L(self.A).copy()
+                        if nx.is_connected(G): # break if the graph is not required to be connected
+                            self.G=G
+                            break
+                        elif iter==max_iter:
+                            raise ValueError(msg)
+                        iter +=1
+                    self.G = G
+                    self.A = nx.to_numpy_array(self.G)
+                    self.L = self.A_to_L(self.A).copy()
         elif type(G)!=type(None):
             self.G = copy.deepcopy(G)
             self.A = nx.to_numpy_array(G)
@@ -573,7 +573,10 @@ class GraphProcess(object):
             self.Graph = Graph(A=kwargs.get('A')) 
         else:
             raise ValueError("Graph process initialization keywords are wrong")
-        rng = np.random.default_rng()
+        if kwargs.get('seed',False):
+            rng = np.random.default_rng(kwargs['seed'])
+        else:
+            rng = np.random.default_rng()
         self.filter_type = kwargs.get('filter_type','Gaussian')
         self.filter_parameters = kwargs.get('filter_parameters',10)
         self.GSO=kwargs.get('GSO','L')
@@ -762,7 +765,7 @@ class GraphProcess(object):
             lda = self.Graph.PG.lda
             V = self.Graph.PG.V
         cov = LA.pinv(np.diag(lda),hermitian=True)
-        n = self.Graph.n
+        
         X0 = rng.multivariate_normal(np.zeros(np.prod(n)), cov, NoS).T
         
         n_new = [ni for ni in n]+[NoS]

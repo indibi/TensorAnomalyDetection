@@ -10,7 +10,7 @@ def mysign(A):
             S=1
     return S
 
-def qmult(A):
+def qmult(A, seed=None):
     """QMULT Pre-multiply matrix by random orthogonal matrix.
 
         QMULT(A) returns Q*A where Q is a random real orthogonal matrix
@@ -39,6 +39,7 @@ def qmult(A):
         assert A>0
         n = A
         A = np.eye(n)
+    
     d = np.zeros((n, 1))
     for k in range(n-1, 0, -1):
         # Generate random Householder transformation.
