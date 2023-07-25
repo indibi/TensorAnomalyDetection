@@ -9,14 +9,20 @@ function [X_an,anomaly_mask] = add_persistent_anomaly(X,anomaly_len,num_anomaly,
 % num_anomaly: Number of synthetic anomalies
 % anomaly_amp: Amplitude of each anomalies
 % mode: The mode in which the anomalies are persistent. Defaults to 1
-%
+% amp_type: The type of anomaly 1: Proportional to log(abs(mean(x(:,anomalous_sample_idxes(i)))))^2
+%                               2: Constant
 % Outputs:
 % X_an: Tensor X with anomaly superposed
 % anomaly_mask: Labels of anomalies. 1 for anomalous, 0 otw.
 if length(varargin)==0
     mode = 1;
-else
+    amp_type =1;
+elseif length(varargin)==1
     mode = varargin{1};
+    amp_type=1
+elseif length(varargin)==2
+    mode = varargin{1};
+    amp_type = varargin{2};
 end
 
 sz = size(X);
@@ -41,7 +47,11 @@ for i = 1:num_anomaly
     an_start = randi(sz(mode)-anomaly_len);
     an_end = an_start + anomaly_len;
     add_sub = sign(randn);
-    anomaly(an_start:an_end, anomalous_sample_idxes(i)) = add_sub*anomaly_amp*log(abs(mean(x(:,anomalous_sample_idxes(i)))))^2;
+    if amp_type==1
+        anomaly(an_start:an_end, anomalous_sample_idxes(i)) = add_sub*anomaly_amp*log(abs(mean(x(:,anomalous_sample_idxes(i)))))^2;
+    else
+        anomaly(an_start:an_end, anomalous_sample_idxes(i)) = add_sub*anomaly_amp;
+    end
     anomaly_indicator(an_start:an_end, anomalous_sample_idxes(i)) = 1;
 end
 

@@ -28,9 +28,9 @@ c = 4;
 NoAL = 5;
 NoA = 100*NoAL;
 LoA =8;
-NoT = 1;
-loss_maxit =250;
-of_maxit =30;
+NoT = 5;
+loss_maxit = 250;
+of_maxit = 30;
 of_errtol = 1e-3;
 % Bookkeeping
 len_lda = 8;
@@ -47,7 +47,7 @@ idxs = [Lda_idxs(:), Gamma_idxs(:)];
 select_loc = randperm(81,NoAL);
 %% RUN EXPERIMENT IN PARALLEL
 delete(gcp('nocreate'));
-parpool('local',NoT);
+parpool(len_lda*len_gma);
 tstart = tic;
 parfor i=1:len_lda*len_gma
     lda = hyper_params(i,1);
@@ -86,32 +86,32 @@ parfor i=1:len_lda*len_gma
         end
         outlying_scores(i,j,:)= outlying_score;
 
-        % label= {'N'};
-        % label =repmat(label,81,1);
-        % label(select_loc) = repmat({'A'},[NoAL,1]);
-        % classNames = cell(2,1);
-        % classNames{1}='N';
-        % classNames{2}='A';
-        % score = [-squeeze(outlying_scores(i,j,:)),squeeze(outlying_scores(i,j,:))];
-        % try
-        %     rocObj = rocmetrics(label,score,classNames);
-        %     auc(i,j) = rocObj.AUC(1);
-        % catch ME
-        %     auc(i,j) = NaN;
-        %     disp('Sacma sapan bisi')
-        % end
+%         label= {'N'};
+%         label =repmat(label,81,1);
+%         label(select_loc) = repmat({'A'},[NoAL,1]);
+%         classNames = cell(2,1);
+%         classNames{1}='N';
+%         classNames{2}='A';
+%         score = [-squeeze(outlying_scores(i,j,:)),squeeze(outlying_scores(i,j,:))];
+%         try
+%             rocObj = rocmetrics(label,score,classNames);
+%             auc(i,j) = rocObj.AUC(1);
+%         catch ME
+%             auc(i,j) = NaN;
+%             disp('Sacma sapan bisi')
+%         end
     end
 end
 tEnd = toc(tstart);
 
 %% SAVE RESULTS
-%results.auc = zeros(len_lda,len_gma,NoT);
+% results.auc = zeros(len_lda,len_gma,NoT);
 results.outlying_scores = zeros(len_lda,len_gma,NoT,81);
 for i = 1:len_lda*len_gma
     lda_idx = idxs(i,1);
     gamma_idx = idxs(i,2);
-    %results.auc(lda_idx,gamma_idx,:) = auc(i,:);
-    results.outlying_scores(lda_idx,gamma_idx,:,:) = outlying_scores(i,:);
+%     results.auc(lda_idx,gamma_idx,:) = auc(i,:);
+    results.outlying_scores(lda_idx,gamma_idx,:,:) = outlying_scores(i,:,:);
 end
 
 results.select_loc = select_loc;
@@ -131,6 +131,6 @@ while isfile([fname,num2str(i,formatSpec),'.mat'])
 end
 save([fname,num2str(i,formatSpec),'.mat'],'results');
 %% Notify with sound
-load handel
-sound(y,Fs)
-clear y Fs
+%load handel
+%sound(y,Fs)
+%clear y Fs
