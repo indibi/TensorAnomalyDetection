@@ -103,7 +103,7 @@ def generate_local_anomaly(X, G, anomaly_type, amp, local_mode=1, radius=1, num_
 def generate_temporal_anomaly(x, amplitude, num_of_anomalies, anomaly_duration=4,
                                window_type='boxcar', distribution='constant', temporal_mode=1, 
                                seed=None):
-    """Generate a temporally smooth anomaly
+    """Generate temporally contiguous anomalies
 
     Args:
         x (np.ndarray): Tensor data with time mode specied with temporal_mode
@@ -116,6 +116,10 @@ def generate_temporal_anomaly(x, amplitude, num_of_anomalies, anomaly_duration=4
 
     Raises:
         NotImplementedError: _description_
+
+    Returns:
+        anomaly (2-tuple): anomaly_signal, anomaly_labels returned as tuple. Labels
+        are set to True for the anomalous entries. 
     """
     dims = x.shape
     anomaly = t2m(np.zeros(dims),temporal_mode)

@@ -11,6 +11,8 @@ def soft_treshold(x, tau):
     """
     if tau <0:
         raise ValueError("The threshold value tau is negative")
+    if tau ==0:
+        return x
     y = x.copy().astype('float64')
     y[x>tau] = x[x>tau] -tau
     y[x<-tau] = x[x<-tau] + tau

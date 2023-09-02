@@ -1,0 +1,6 @@
+artifact_location: file:///mnt/ufs18/home-207/indibimu/repos/TensorAnomalyDetection/testbench/mlruns/628026774695455113
+creation_time: 1690850841741
+experiment_id: '628026774695455113'
+last_update_time: 1690850841741
+lifecycle_stage: active
+name: NYC_hyperopt_hp_search

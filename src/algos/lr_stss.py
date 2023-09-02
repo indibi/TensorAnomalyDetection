@@ -194,13 +194,13 @@ def lr_stss(Y, A, temp_m, spat_m, **kwargs):
         #         if r[-1]>rho_mu*s[-1]:
         #             rho=rho*rho_upd
         #             rhos.append(rho)
-        #             for i,m in enumerate(modes):
-        #                 inv_T[i] = np.linalg.inv(alpha[i]*Ls[i] + rho*np.eye(n[m-1]))
+        #             inv_T = inv(rho2*np.eye(sz[temp_m-1])+ rho*Delt.T@Delt)
+        #             inv_L = inv(rho2*np.eye(sz[spat_m-1])+ rho*I_A.T@I_A)
         #         elif s[-1]>rho_mu*r[-1]:
         #             rho=rho/rho_upd
         #             rhos.append(rho)
-        #             for i,m in enumerate(modes):
-        #                 Inv[i] = np.linalg.inv(alpha[i]*Ls[i] + rho*np.eye(n[m-1]))
+        #             inv_T = inv(rho2*np.eye(sz[temp_m-1])+ rho*Delt.T@Delt)
+        #             inv_L = inv(rho2*np.eye(sz[spat_m-1])+ rho*I_A.T@I_A)
         #         else:
         #             rhos.append(rho)
 

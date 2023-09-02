@@ -13,9 +13,9 @@ def horpca_singleton(B, lda1=-1, rho=-1, verbose=1, err_tol=1e-5, maxit=100, ste
         B (np.ma.masked_array): Observed tensor data
         lda1 (float): Hyperparameter of the l_1 norm.
         verbose (bool): Algorithm verbisity level. Defaults to True.
-        max_it (int): Maximum number of iterations allowed for the algorithm. Defaults to 250.
-        rho_upd (float): Step size update coefficient of the ADMM algorithm. Defaults to 1.2.
-        rho_mu (float): Step size update treshold of the ADMM algorithm. Defaults to 10.
+        max_it (int): Maximum number of iterations allowed for the algorithm. Defaults to 100.
+        step_size_growth (float): Step size update coefficient of the ADMM algorithm. Defaults to 1.2.
+        mu (float): Step size update treshold of the ADMM algorithm. Defaults to 10.
         err_tol (float): Convergence criteria for the algorithm. Defaults to 1e-5.
 
     Returns:
@@ -36,9 +36,12 @@ def horpca_singleton(B, lda1=-1, rho=-1, verbose=1, err_tol=1e-5, maxit=100, ste
     
     try:
         mask = B.mask
+        if mask.size ==1:
+            B = np.ma.masked_array(B, mask=np.zeros(B.shape))
         result = _horpca_singleton_m(B, lda1, rho, verbose, err_tol, maxit, step_size_growth, mu)
     except AttributeError:
-        result = _horpca_singleton(B, lda1, rho, verbose, err_tol, maxit, step_size_growth, mu)
+        B = np.ma.masked_array(B,np.zeros(B.shape))
+        result = _horpca_singleton_m(B, lda1, rho, verbose, err_tol, maxit, step_size_growth, mu)
     return result
 
 

@@ -4,17 +4,21 @@ def generate_connected_graph(size, type, seed=0, maxit=200, **kwargs):
     """Generate a random connected graph 
 
     Args:
-        size (int): number of vertices
-        type (int): Type of the random graph
+        size (int): number of vertices in the graph. If the graph type is grid, takes in
+            2-tuple as argument the size of the grid. Ex: (5,10)
+        type (str): Type of the random graph. The choices are 'geometric' for random geometric,
+            'grid' for a grid of vertices with cartesian product structure, 'er' erdos renyi, 
+            'ba' barabasi-albert random graph.
         param (_type_): _description_
         seed (int): random generation 
         maxit (int, optional): _description_. Defaults to 200.
+        radius (float,optional): 
 
     Raises:
         ValueError: _description_
 
     Returns:
-        _type_: _description_
+        G, sd (2-tuple): Returns the graph and the seed
     """
     it = 0
     while True:
