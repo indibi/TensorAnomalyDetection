@@ -60,6 +60,7 @@ def tensor_outlying_function(X, Sn, maxit=100, err_tol=1e-4, v=2, seed=10, retur
                 sn[:,i] = s.ravel()#.reshape((tmp_dim[mode-1],1))
             
             e, u = vector_outlying_score(x, sn,return_v=True)
+            u = u/norm(u)
             Us[mode-1]= u.reshape((dim[mode-1],1))
             O_r.append(e)
             # Us[mode-1] = U[:,i].reshape((dim[mode-1],1))
@@ -74,9 +75,9 @@ def tensor_outlying_function(X, Sn, maxit=100, err_tol=1e-4, v=2, seed=10, retur
             break
 
     if return_Us:
-        return O_r_pass[-1],np.array(O_r_pass),Us 
+        return O_r_pass[-1],np.array(O_r),Us 
     else:
-        return O_r_pass[-1],np.array(O_r_pass)
+        return O_r_pass[-1],np.array(O_r)
 
 
 def pre_tensor_pca(Sn, X, threshold=0.01, rank=None):
@@ -104,11 +105,6 @@ def pre_tensor_pca(Sn, X, threshold=0.01, rank=None):
         C = sum([(s-M)@(s-M).T for s in Sn_i])/len(Sn)
         lda, u = eigh(C)
         threshold*np.abs(lda)>sum(np.abs(lda))
-
-        
-
-
-
 
 
 def mode_product(X, A, n):
@@ -186,7 +182,7 @@ def vector_outlying_score(x, Sn, return_v=False, verbose=0):
             if verbose:
                 print(eigh(B))
             try:
-                B = B + np.eye(B.shape[0])*1e-6
+                B = B + np.eye(B.shape[0])*1e-9
                 lda, u = eigh(A,B,subset_by_index=[len(x)-1,len(x)-1])
             except:
                 print(eigh(B))
